@@ -1,6 +1,6 @@
 import express from 'express';
 import { validateErrorEvent } from '../middleware/validateErrorEvent';
-import { errorStorage } from '../services/errorStorage';
+import { errorService } from '../services/errorService';
 
 const router = express.Router();
 
@@ -27,10 +27,14 @@ const router = express.Router();
  *                 id:
  *                   type: string
  */
-router.post('/', validateErrorEvent, (req, res) => {
-  const errorData = req.body;
-  const id = errorStorage.storeError(errorData);
-  res.status(201).json({ id });
+router.post('/', validateErrorEvent, async (req, res) => {
+  try {
+    const errorData = req.body;
+    const id = await errorService.storeError(errorData);
+    res.status(201).json({ id });
+  } catch (error) {
+    res.status(500).json({ message: 'Error storing error event' });
+  }
 });
 
 /**
@@ -55,12 +59,47 @@ router.post('/', validateErrorEvent, (req, res) => {
  *       404:
  *         description: Error not found
  */
-router.get('/:id', (req, res) => {
-  const error = errorStorage.getError(req.params.id);
-  if (error) {
-    res.json(error);
-  } else {
-    res.status(404).json({ message: 'Error not found' });
+router.get('/:id', async (req, res) => {
+  try {
+    const error = await errorService.getError(req.params.id);
+    if (error) {
+      res.json(error);
+    } else {
+      res.status(404).json({ message: 'Error not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving error event' });
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const projectId = req.query.projectId as string;
+    const environment = req.query.environment as string;
+    const severity = req.query.severity as string;
+
+    const [errors, total] = await errorService.getErrors(page, limit, projectId, environment, severity);
+    res.json({
+      errors,
+      total,
+      page,
+      limit,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving error events' });
+  }
+});
+
+router.get('/stats/:projectId', async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
+    const days = parseInt(req.query.days as string) || 7;
+    const stats = await errorService.getErrorStats(projectId, days);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving error statistics' });
   }
 });
 

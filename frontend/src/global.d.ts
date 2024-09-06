@@ -1,4 +1,4 @@
-import { ErrorMonitoringSDK } from './src/sdk';
+import { ErrorMonitoringSDK } from './sdk';
 
 // Add the SDK instance to the window object for use throughout the application
 declare global {

@@ -63,6 +63,31 @@ export class ErrorService {
 
     return stats;
   }
+
+  async getErrorTrend(days: number = 7): Promise<any[]> {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const trend = await this.errorRepository
+      .createQueryBuilder("error")
+      .select("DATE(error.timestamp)", "date")
+      .addSelect("COUNT(*)", "count")
+      .where("error.timestamp >= :startDate", { startDate })
+      .groupBy("DATE(error.timestamp)")
+      .orderBy("DATE(error.timestamp)", "ASC")
+      .getRawMany();
+
+    if (trend.length === 0) {
+      const latestError = await this.errorRepository
+        .createQueryBuilder("error")
+        .orderBy("error.timestamp", "DESC")
+        .getOne();
+
+      console.log("Latest error:", latestError);
+    }
+
+    return trend;
+  }
 }
 
 export const errorService = new ErrorService(dataSource);

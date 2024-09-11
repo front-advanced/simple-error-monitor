@@ -4,6 +4,16 @@ import { errorService } from '../services/errorService';
 
 const router = express.Router();
 
+router.get('/stats/trend', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days as string) || 7;
+    const trend = await errorService.getErrorTrend(days);
+    res.json(trend);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving error trend' });
+  }
+});
+
 /**
  * @swagger
  * /api/errors:
@@ -102,5 +112,7 @@ router.get('/stats/:projectId', async (req, res) => {
     res.status(500).json({ message: 'Error retrieving error statistics' });
   }
 });
+
+
 
 export default router;

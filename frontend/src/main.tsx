@@ -8,7 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 // Initialize the SDK
 const errorSDK = new ErrorMonitoringSDK({
   projectId: "your-project-id",
-  environment: "development",
+  environment: process.env.NODE_ENV as any ?? "development",
   apiUrl: "http://localhost:8080/api/errors",
 });
 errorSDK.init();

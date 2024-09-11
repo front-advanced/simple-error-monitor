@@ -39,4 +39,7 @@ export class ErrorEvent {
 
   @Column('simple-json')
   metadata: { [key: string]: any };
+
+  @Column('text', { nullable: true })
+  version: string;
 }

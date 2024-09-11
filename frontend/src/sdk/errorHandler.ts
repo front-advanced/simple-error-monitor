@@ -41,6 +41,7 @@ export class ErrorHandler {
               ...error,
               projectId: this.config.projectId,
               environment: this.config.environment,
+              version: import.meta.env.VITE_GIT_COMMIT_HASH,
             }),
           });
 

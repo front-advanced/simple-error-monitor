@@ -1,6 +1,7 @@
 import express from 'express';
 import { validateErrorEvent } from '../middleware/validateErrorEvent';
 import { errorService } from '../services/errorService';
+import { errorParserService } from '../services/errorParserService';
 
 const router = express.Router();
 
@@ -40,7 +41,13 @@ router.get('/stats/trend', async (req, res) => {
 router.post('/', validateErrorEvent, async (req, res) => {
   try {
     const errorData = req.body;
-    const id = await errorService.storeError(errorData);
+    const { stack, projectId, version } = errorData;
+    
+    const parsedStack = await errorParserService.parseError(stack, projectId, version);
+    console.log('Parsed stack:', parsedStack);
+    const errorWithParsedStack = { ...errorData, stack: parsedStack };
+    
+    const id = await errorService.storeError(errorWithParsedStack);
     res.status(201).json({ id });
   } catch (error) {
     res.status(500).json({ message: 'Error storing error event' });

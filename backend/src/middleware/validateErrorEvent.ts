@@ -10,7 +10,8 @@ const errorEventSchema = Joi.object({
   projectId: Joi.string().required(),
   environment: Joi.string().valid('production', 'development', 'staging').required(),
   severity: Joi.string().valid('low', 'medium', 'high', 'critical').required(),
-  metadata: Joi.object().pattern(Joi.string(), Joi.any())
+  metadata: Joi.object().pattern(Joi.string(), Joi.any()),
+  version: Joi.string().optional(),
 });
 
 export const validateErrorEvent = (req: Request, res: Response, next: NextFunction) => {
